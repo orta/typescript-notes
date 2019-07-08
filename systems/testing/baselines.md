@@ -1,6 +1,15 @@
 # Baselines
 
-Baseline tests are effectively large folder-based snapshot tests. 
+Baseline tests are effectively large folder-based snapshot tests. Like [fourslash](./fourslash), these tests are
+somewhat integration level. These test generally test the internals of the compiler, they do this by you creating
+a TypeScript file where the snapshot result is a symbol map of all the symbols in that file and a list of all
+raised errors then compiling the tests.
+
+### How to make a baseline
+
+1. Make a new file: ` touch tests/cases/compiler/overloadFunctionsNotEqualToGenerics.ts`. Add some TypeScript to it.
+2. d
+
 
 ### How to amend a baseline
 
