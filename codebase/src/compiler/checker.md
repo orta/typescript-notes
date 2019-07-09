@@ -78,6 +78,7 @@ Let's try get a really early error, with this bad code:
 ```ts
 // A return statement shouldn't exist here in strict mode (or any mode?)
 return;
+~~~~~~
 ```
 
 It goes into [`checkReturnStatement`][6] which uses [`getContainingFunction`][7] to determine if the `return`
