@@ -132,10 +132,10 @@ TODO
 ## Debugging Advice
 
 - Add the following to your watch section in VS Code:
-- `node.__debugKind`
-- `node.__debugGetText()`
-- `source.symbol.declarations[0].__debugKind`
-- `target.symbol.declarations[0].__debugKind`
+  - `node.__debugKind`
+  - `node.__debugGetText()`
+  - `source.symbol.declarations[0].__debugKind`
+  - `target.symbol.declarations[0].__debugKind`
 
 * If you want to find a diagnostic in the codebase, search for `diag(WXZY` e.g `diag(2328`, you'll find
   `src/compiler/diagnosticInformationMap.generated.ts` has it being referenced by a key. Search for that key.
