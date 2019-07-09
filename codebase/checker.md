@@ -1,32 +1,86 @@
 # Checker
 
-Ok, yeah, so it's a 30k LOC file. So better to get started somewhere. 
+Ok, yeah, so it's a 30k LOC file. Why 30k lines in one file? Well there's two main arguments:
+
+- All of the checker is in one place.
+- Lots of these functions need to know a lot about each other, the top of the function `createTypeChecker` has a
+  set of variables which are global within all of these functions and are liberally accessed.
+
+  Switching to different files means probably making [god objects][god], and the checker needs to be extremely
+  fast. We want to avoid additional calls for ambient context. There are architectural patterns for this, but it's
+  better to assume good faith that they've been explored already (8 years down the line now.)
+
+Anyway, better to get started somewhere. I [asked online](https://twitter.com/orta/status/1148335807780007939)
+about how people would try to study a file like this and I think one of the best paths is by following a
+particular story as a file gets checked.
 
 ### An entry-point
 
-[0]: <src/compiler/program.ts - function getDiagnosticsProducingTypeChecker() {>
-[1]: <src/compiler/checker.ts - function getDiagnosticsWorker(sourceFile: SourceFile): Diagnostic[] {>
-[2]: <src/compiler/checker.ts - function checkSourceFileWorker(node: SourceFile) {>
-[3]: </src/compiler/types.ts - export interface NodeLinks>
+The likely entry point is via a Program. The program has a memoized typechecker created in
+[`getDiagnosticsProducingTypeChecker`][0] which creates a type checker.
 
-The likely entry point is via a Program. The program has a memoized typechecker created 
-in [`getDiagnosticsProducingTypeChecker`][0] which creates a type checker.
+The initial start of type checking starts with [`getDiagnosticsWorker`][1], worker in this case isn't a threading
+term I believe ( at least I can't find anything like that in the code ) - it is set up to listen for diagnostic
+results (e.g. warns/fails) and then triggers [`checkSourceFileWorker`][2].
 
-The initial start of type checking starts with [`getDiagnosticsWorker`][1], worker in this case isn't a threading term
-I believe ( at least I can't find anything like that in the code ) - it is set up to listen for diagnostic results 
-(e.g. warns/fails) and then triggers [`checkSourceFileWorker`][2]. 
+This function starts at the root `Node` of any TS/JS file node tree: `SourceFile`. It will then have to recurse
+through all of the [AST][ast] nodes in it's tree.
 
-This function starts at the root `Node` of any TS/JS file  node tree: `SourceFile`.
+It doesn't start with a single recursive function though, it starts by looking through the SourceFile's
+[`statements`][4] and through each one of those to get all the nodes. For example:
 
-# Checking a Node
+```ts
+// Statement 1
+const hi = () => "Hello";
 
+// Statement 2
+console.log(hi());
+```
 
+Which looks a bit like:
+
+```sh
+SourceFile
+ statements:
+
+  - VariableStatement
+    - declarationList: VariableDeclarationList # (because any const cna have many declarations in a row... )
+      - variables: VariableStatement
+        - etc
+
+  - ExpressionStatement
+    - expression: CallExpression # outer console.log
+      - expression: PropertyAccessExpression
+        - etc
+      - arguments: CallExpression
+        - etc
+```
+
+[See AST Explorer](https://astexplorer.net/#/gist/80c981c87035a45a753c0ee5c983ecc9/6276351b153f4dac9811bf7214c9b236ae420c7e)
+
+Each node has a different variable to work with (so you can't just say
+`if node.children { node.children.foreach(lookAtNode) }` ) but instead you need to examine each node individually.
+
+# Checking a Statement
+
+Initially the meat of the work starts in [`checkSourceElementWorker`][6] which has a by `switch` statement that
+contains all legitimate nodes which can start a statement.
 
 ### Caching Data
 
-Note there are two ways in which TypeScript is used, as a server and as a one-off compiler. In a server, we want to
-re-use as much as possible between API requests, and so the Node tree is treated as immutable data. This gets tricky
-inside the Type Checker, which for speed reasons needs to cache data somewhere. The solution to this \
-is the [`NodeLinks`][3] property on a Node. 
+Note there are two ways in which TypeScript is used, as a server and as a one-off compiler. In a server, we want
+to re-use as much as possible between API requests, and so the Node tree is treated as immutable data. This gets
+tricky inside the Type Checker, which for speed reasons needs to cache data somewhere. The solution to this \
+is the [`NodeLinks`][3] property on a Node.
 
 The Type Checker fills this up during the run and re-uses it, then it is discarded.
+
+<!-- prettier-ignore-start -->
+[0]: <src/compiler/program.ts - function getDiagnosticsProducingTypeChecker() {>
+[1]: <src/compiler/checker.ts - function getDiagnosticsWorker(sourceFile: SourceFile): Diagnostic[] {> 
+[2]: <src/compiler/checker.ts - function checkSourceFileWorker(node: SourceFile) {> 
+[3]: </src/compiler/types.ts -  export interface NodeLinks> 
+[4]: ../GLOSSARY.md#statements 
+[ast]: ../GLOSSARY.md#statements 
+[5]: <src/compiler/checker.ts - function checkSourceElementWorker(node: Node): void {>
+<!-- prettier-ignore-end -->
