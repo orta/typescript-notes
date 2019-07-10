@@ -123,11 +123,48 @@ This gets tricky inside the Type Checker, which for speed reasons needs to cache
 this is the [`NodeLinks`][3] property on a Node. The Type Checker fills this up during the run and re-uses it,
 then it is discarded next time you re-run the checker.
 
+### Type Flags
+
+Because TypeScript is a [structural type system][20], every type can reasonably be compared with every other type.
+One of the main ways in which TypeScript keeps track of the underlying data-model is via the
+[`enum TypeFlags`][19]. Accessed via `.flags` on any node, it is a value which is used via bitmasking to let you
+know what data it represents.
+
+If you wanted to check for whether the type is a union:
+
+```ts
+if (target.flags & TypeFlags.Union && source.flags & TypeFlags.Object) {
+  // is a union object
+}
+```
+
+When running the compiler in debug mode, you can see a string version of this via `target.__debugFlags`.
+
 ### Type Comparison
 
-<!-- What happens in [`checkTypeRelatedTo`][17]? This function is mostly about handling the diagnostic results from -->
+The entry point for comparing two types happens in [`checkTypeRelatedTo`][17]. This function is mostly about
+handling the diagnostic results from any checking though and doesn't do the work. The honour of that goes to
+[`isRelatedTo`][18] which:
 
-TODO
+- Figures out what the source and target types should be (based on freshness (a literal which was created in an
+  expression), whether it is substituted () or simplifiable (a type which depends first on resolving another
+  type))
+
+- First, check if they're identical via [`isIdenticalTo`][21]. The check for most objects occurs in
+  [`recursiveTypeRelatedTo`][22], unions and intersections have a check that compares each value in
+  [`eachTypeRelatedToSomeType`][23] which eventually calls [`recursiveTypeRelatedTo`][22] for each item in the
+  type.
+
+- The heavy lifting of the comparison depending on what flags are set on the node is done in
+  [`structuredTypeRelatedTo`][23]. Where it picks off one by one different possible combinations for matching and
+  returns early as soon as possible.
+
+A lot of the functions related to type checking return a [`Ternary`][24], which an enum with three states, true,
+false and maybe. This gives the checker the chance to admit that it probably can't figure out whether a match is
+true currently (maybe it hit the 100 depth limit for example) and potentially could be figured out coming in from
+a different resolution.
+
+TODO: what are substituted types?
 
 ## Debugging Advice
 
@@ -148,8 +185,8 @@ TODO
 [1]: <src/compiler/checker.ts - function getDiagnosticsWorker> 
 [2]: <src/compiler/checker.ts - function checkSourceFileWorker> 
 [3]: </src/compiler/types.ts -  export interface NodeLinks> 
-[4]: ../GLOSSARY.md#statements 
-[ast]: ../GLOSSARY.md#statements 
+[4]: GLOSSARY.md#statements 
+[ast]: GLOSSARY.md#statements 
 [5]: <src/compiler/checker.ts - function checkSourceElementWorker>
 [6]: <src/compiler/checker.ts - function checkReturnStatement>
 [7]: <src/compiler/checker.ts - export function getContainingFunction>
@@ -163,6 +200,11 @@ TODO
 [15]: <src/compiler/checker.ts - function isTypeRelatedTo>
 [16]: <src/compiler/checker.ts - function isSimpleTypeRelatedTo>
 [17]: <src/compiler/checker.ts - function checkTypeRelatedTo>
-
-
+[17]: <src/compiler/checker.ts - function isRelatedTo>
+[19]: <src/compiler/types.ts - export const enum TypeFlags>
+[20]: GLOSSARY.md#structural-type-system 
+[21]: <src/compiler/checker.ts - function isIdenticalTo>
+[22]: <src/compiler/checker.ts - function recursiveTypeRelatedTo>
+[22]: <src/compiler/checker.ts - function eachTypeRelatedToSomeType>
+[23]: <src/compiler/checker.ts - function structuredTypeRelatedTo>
 <!-- prettier-ignore-end -->
