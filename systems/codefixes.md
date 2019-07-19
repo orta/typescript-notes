@@ -96,5 +96,5 @@ These are some reference PRs to look at
 [1]: <src/services/services.ts - function getCodeFixesAtPosition>
 [2]: src/services/codeFixProvider.ts
 [3]: <src/services/services.ts - export function getFixes>
-[3]: <src/services/codeFixProvider.ts - export function getFixes>
+[4]: <src/services/codeFixProvider.ts - export function getFixes>
 <!-- prettier-ignore-end -->
