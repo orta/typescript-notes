@@ -28,17 +28,40 @@ APIs that it works with:
 The `ChangeTrack` class is then used to provide high level API to describe the sort of changes you might want to
 make, which eventually fall into one of the four categories above.
 
+### Making Changes
+
+The end result of using a `ChangeTrack` object is an array of `FileTextChanges` objects. The `ChangeTrack.with`
+function lets you work with a tracker instance elsewhere and passes back the `ChangeTrack` objects.
+
+The core work in generating changes occurs in:
+
+- [`getTextChangesFromChanges`][4]
+- [`computeNewText`][5]
+- [`getFormattedTextOfNode`][6]
+
+Going from an AST node to text is done by creating a [`printer`][7] in [`getNonformattedText`][8]. The printer
+returns an unformatted node, which is then ran through [a formatter][./formatting.md] and the raw string
+substitution is done in [`applyChanges`][9].
+
+Changes look like this:
+
+```ts
+[{ fileName: "/b.js", textChanges: [{ span: { start: 0, length: 0 }, newText: "// @ts-ignore\n" }] }];
+```
+
 ### Writing
 
-[`newFileChanges`][3] hadnles
-
-### TextChangesWriter
-
-[`createWriter`][2] is the production version of an object which the emit the changes held by
+[`newFileChanges`][3] handles passing the set of
 
 <!-- prettier-ignore-start -->
 [0]: <src/services/textChanges.ts - export class ChangeTracker>
 [1]: <src/services/textChanges.ts - type Change =>
 [2]: <src/services/textChanges.ts - function createWriter>
-[2]: <src/services/textChanges.ts - function newFileChanges>
+[3]: <src/services/textChanges.ts - function newFileChanges>
+[4]: <src/services/textChanges.ts - function getTextChangesFromChanges>
+[5]: <src/services/textChanges.ts - function computeNewText>
+[6]: <src/services/textChanges.ts - function getFormattedTextOfNode>
+[7]: <src/compiler/emitter.ts - function createPrinter>
+[8]: <src/services/textChanges.ts - function getNonformattedText>
+[8]: <src/services/textChanges.ts - function applyChanges>
 <!-- prettier-ignore-end -->
