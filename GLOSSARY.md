@@ -188,6 +188,18 @@ interface ReadonlyDog {
 
 This can work where you
 
+- `Type Assertion` - override its inferred and analyzed view of a type
+
+```ts
+interface Foo {
+    bar: number;
+    bas: string;
+}
+var foo = {} as Foo;
+foo.bar = 123;
+foo.bas = 'hello';
+```
+
 ### Rarely heard
 
 - `Deferred`
