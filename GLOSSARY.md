@@ -56,7 +56,7 @@
   let v5 = c5; // Type number | string
   ```
 
-- `Generics` - A way to have variables inside a type systems.
+- `Generics` - A way to have variables inside a type system.
 
   ```ts
   function first(array: any[]): any {
@@ -64,8 +64,8 @@
   }
   ```
 
-  You want to be able to pass a variable type into this function, so you wrap the function with brackets and a
-  type can be passed through.
+  You want to be able to pass a variable type into this function, so you annotate the function with angle brackets and a
+  _type parameter_:
 
   ```ts
   function first<T>(array: T[]): T {
@@ -73,9 +73,36 @@
   }
   ```
 
-  This means whatever the type of the array coming in, is the type of the array coming out. These can start
-  looking very complicated over time, but the principal is the same, it just looks more complicated because of the
-  single letter.
+  This means the return type of `first` is the same as the type of the array elements passed in. (These can start
+  looking very complicated over time, but the principle is the same; it just looks more complicated because of the
+  single letter.) Generic functions should always use their type parameters in more than one position (e.g. above,
+  `T` is used both in the type of the `array` parameter and in the function’s return type). This is the heart of what
+  makes generics useful—they can specify a _relationship_ between two types (e.g., a function’s output is the same as
+  input, or a function’s two inputs are the same type). If a generic only uses its type parameter once, it doesn’t
+  actually need to be generic at all, and indeed some linters will warn that it’s a _useless generic_.
+  
+  Type parameters can usually be inferred from function arguments when calling generics:
+  
+  ```ts
+  first([1, 2, 3]); // 'T' is inferred as 'number'
+  ```
+  
+  It’s also possible to specify them explicitly, but it’s preferable to let inference work when possible:
+  
+  ```ts
+  first<string>(['a', 'b', 'c']);
+  ```
+  
+* `Outer type parameter` - A type parameter declared in a parent generic construct:
+
+  ```ts
+  class Parent<T> {
+    method<U>(x: T, y: U): U {
+      // 'T' is an *outer* type parameter of 'method'
+      // 'U' is a *local* type parameter of 'method'
+    }
+  }
+  ```
 
 * `Narrowing` - Taking a union of types and reducing it.
 
@@ -187,6 +214,18 @@ interface ReadonlyDog {
 ```
 
 This can work where you
+
+- `Type Assertion` - override its inferred and analyzed view of a type
+
+```ts
+interface Foo {
+    bar: number;
+    bas: string;
+}
+var foo = {} as Foo;
+foo.bar = 123;
+foo.bas = 'hello';
+```
 
 ### Rarely heard
 
