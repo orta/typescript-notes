@@ -1,16 +1,22 @@
 ### Terminology from inside the codebase
 
-- `Parser` - Takes a string and tries to convert it into an in-memory tree representation which you can work with
-  in the compiler
-- `Scanner` - A scanner takes a string an chops into tokens in a linear fashion, then it's up to a parser to
-  tree-ify them
+- `Parser` - Takes source code and tries to convert it into an in-memory AST representation which you can work
+  with in the compiler. Also: [see Parser](https://basarat.gitbooks.io/typescript/docs/compiler/parser.html)
+- `Scanner` - Used by the parser to convert a string an chops into tokens in a linear fashion, then it's up to a
+  parser to tree-ify them. Also: [see Scanner](https://basarat.gitbooks.io/typescript/docs/compiler/scanner.html)
+- `Binder` - Creates a symbol map and uses the AST to provide the type system
+  [See Binder](https://basarat.gitbooks.io/typescript/docs/compiler/binder.htmlhttps://basarat.gitbooks.io/typescript/docs/compiler/binder.html)
+- `Checker` - Takes the AST, symbols and does the type checking and inference -
+  [See Checker](https://basarat.gitbooks.io/typescript/docs/compiler/checker.html)
 - `Token` - A set of characters with some kind of semantic meaning, a parser generates a set of tokens
 - `AST` - An abstract syntax tree. Basically the in-memory representation of all the identifiers as a tree of
   tokens.
 - `Node` - An object that lives inside the tree
-- `Location`
+- `Location` / `Range`
 - `Freshness` - When a literal type is first created and not expanded by hitting a mutable location, see [Widening
   and Narrowing in TypeScript][wnn].
+- `Symbol` - The binder creates
+- `Transient Symbol` -
 
 ### Type stuff which can be see outside the compilers
 
@@ -48,7 +54,7 @@
   const c4 = true; // Type true
   const c5 = c4 ? 1 : "abc"; // Type 1 | "abc"
 
-  // The types are the class of the literal
+  // The types are the class of the literal, because let allows it to change
   let v1 = 1; // Type number
   let v2 = c2; // Type number
   let v3 = c3; // Type string
@@ -64,8 +70,8 @@
   }
   ```
 
-  You want to be able to pass a variable type into this function, so you annotate the function with angle brackets and a
-  _type parameter_:
+  You want to be able to pass a variable type into this function, so you annotate the function with angle brackets
+  and a _type parameter_:
 
   ```ts
   function first<T>(array: T[]): T {
@@ -76,23 +82,23 @@
   This means the return type of `first` is the same as the type of the array elements passed in. (These can start
   looking very complicated over time, but the principle is the same; it just looks more complicated because of the
   single letter.) Generic functions should always use their type parameters in more than one position (e.g. above,
-  `T` is used both in the type of the `array` parameter and in the function’s return type). This is the heart of what
-  makes generics useful—they can specify a _relationship_ between two types (e.g., a function’s output is the same as
-  input, or a function’s two inputs are the same type). If a generic only uses its type parameter once, it doesn’t
-  actually need to be generic at all, and indeed some linters will warn that it’s a _useless generic_.
-  
+  `T` is used both in the type of the `array` parameter and in the function’s return type). This is the heart of
+  what makes generics useful—they can specify a _relationship_ between two types (e.g., a function’s output is the
+  same as input, or a function’s two inputs are the same type). If a generic only uses its type parameter once, it
+  doesn’t actually need to be generic at all, and indeed some linters will warn that it’s a _useless generic_.
+
   Type parameters can usually be inferred from function arguments when calling generics:
-  
+
   ```ts
   first([1, 2, 3]); // 'T' is inferred as 'number'
   ```
-  
+
   It’s also possible to specify them explicitly, but it’s preferable to let inference work when possible:
-  
+
   ```ts
-  first<string>(['a', 'b', 'c']);
+  first<string>(["a", "b", "c"]);
   ```
-  
+
 * `Outer type parameter` - A type parameter declared in a parent generic construct:
 
   ```ts
@@ -134,7 +140,7 @@ expanded version of `"Hello World"` which went from one value ever, to any known
 - `Transient` - unsure
 
 - `Partial Type` -
-- `Synthetic`
+- `Synthetic` -
 - `Union Types`
 - `Enum`
 - `Discriminant`
@@ -219,13 +225,19 @@ This can work where you
 
 ```ts
 interface Foo {
-    bar: number;
-    bas: string;
+  bar: number;
+  bas: string;
 }
 var foo = {} as Foo;
 foo.bar = 123;
-foo.bas = 'hello';
+foo.bas = "hello";
 ```
+
+- `Incremental Parsing` - Having an editor pass a range of edits, and using that range to invalidate a cache of
+  the AST. Re-running the type checker will keep the out of range nodes and only parse the new section.
+- `Incremental Compiling` - The compiler keeps track of all compilation hashes, and timestamps when a file has
+  been transpiled. Then when a new module is changed, it will use the import/export dependency graph to invalidate
+  and re-compile only the affected code.
 
 ### Rarely heard
 
