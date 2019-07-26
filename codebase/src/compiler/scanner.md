@@ -1,11 +1,12 @@
-# Parser
+# Scanner
 
-One of the smallest parts of the compiler, the scanner is a singleton which is controlled by a [parser][0].
+One of the smallest parts of the compiler's critical path to AST then type-checking. It exists to create a stream
+of syntax tokens for use by another object. The scanner gets most of its usage via a [parser][0] instance.
 
-## The process
+## Overview
 
-You create a Scanner instance via [`createScanner`][1], there are two main modes of scanning: Standard and JSX,
-and a third smaller context of JSDoc comment scanning.
+You create a Scanner instance via [`createScanner`][1], there are two main modes of scanning: Standard and JSX.
+Then there are specific functions for scanning inside JSDoc comments.
 
 First you set the text of a scanner to be your JS source code via [`setText`][2], this takes the source code and
 an optional start and end range in which you want to scan. This range is an important part of what keeps
@@ -57,6 +58,19 @@ nearly always off, but it is used inside the [formatter][6] and for syntax highl
 Some of the more complicated aspects of JSX support is mostly handled back in [the parser][0], however JSX support
 in the scanner [uses specific syntax tokens][8].
 
+## Flags
+
+One way for the scanner to keep track of scan issues, or internal state is [via `TokenFlags`][9]. Any example of
+this is in scanning a number. TypeScript supports underscores in numbers `100_000`, when scanning a number literal
+if it detects a `CharacterCodes._` then the flag `TokenFlags.ContainsSeparator` is set and later on that is used
+to ensure the `tokenValue` is set correctly.
+
+## Rescanning
+
+Because the scanner is only interested in passing out tokens as it sees them, it doesn't really have a memory of
+previous tokens. This means that occasionally the controlling object will need to rewind and re-run the scanner
+with a different type of context. This is called rescanning.
+
 ## Example code
 
 [Here's a scanner playground](https://5d39df23407c626e65aee7ef--ts-scanner-tokens.netlify.com) - adding TypeScript
@@ -74,4 +88,5 @@ doesn't do that.
 [6]: ./formatter.md
 [7]: <src/services/classifier.ts - function createClassifier>
 [8]: <src/compiler/types.ts - type JsxTokenSyntaxKind>
+[9]: <src/compiler/types.ts - export const enum TokenFlags>
 <!-- prettier-ignore-end -->
