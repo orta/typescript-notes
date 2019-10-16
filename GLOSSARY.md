@@ -62,6 +62,20 @@
   let v5 = c5; // Type number | string
   ```
 
+- `Control Flow Analysis` - using the natural branching and execution path of code to change the types at
+  different locations in your source code by static analysis.
+
+  ```ts
+  type Bird = { color: string, flaps: true };
+  type Tiger = { color: string, stripes: true };
+  declare animal: Bird | Tiger
+
+  if ("stripes" in animal) {
+    // Inside here animal is only a tiger, because TS could figure out that
+    // the only way you could get here is when animal is a tiger and not a bird
+  }
+  ```
+
 - `Generics` - A way to have variables inside a type system.
 
   ```ts
@@ -110,9 +124,9 @@
   }
   ```
 
-* `Narrowing` - Taking a union of types and reducing it.
+* `Narrowing` - Taking a union of types and reducing it to fewer options.
 
-  A great case is when using `--strictNullCheck`
+  A great case is when using `--strictNullCheck` when using control flow analysis
 
   ```ts
   // I have a dog here, or I don't
@@ -180,7 +194,8 @@ This makes it easier to keep a single source of truth in your types.
   ```
 
 - `IndexedAccess` - ( https://github.com/Microsoft/TypeScript/pull/30769 )
-- `Conditional`
+- `Conditional Types`
+- `Contextual Types`
 - `Substitution`
 - `NonPrimitive`
 - `Instantiable`
