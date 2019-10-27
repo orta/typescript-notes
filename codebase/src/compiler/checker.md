@@ -168,11 +168,10 @@ TODO: what are substituted types?
 
 ## Debugging Advice
 
-
-* If you want to find a diagnostic in the codebase, search for `diag(WXZY` e.g ``, you'll find
+- If you want to find a diagnostic in the codebase, search for `diag(WXZY` e.g ``, you'll find
   `src/compiler/diagnosticInformationMap.generated.ts` has it being referenced by a key. Search for that key.
 
-* If you're working from an error and want to see the path it took to get there, you can add a breakpoint in
+- If you're working from an error and want to see the path it took to get there, you can add a breakpoint in
   [`createFileDiagnostic`][10] which should get called for all diagnostic errors.
 
 <!-- prettier-ignore-start -->
