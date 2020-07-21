@@ -3,9 +3,9 @@
 - Clone the repo: `git clone https://github.com/microsoft/TypeScript`
 - `cd TypeScript`
 - `npm i`
-- `gulp`
+- `npm run gulp`
 - `code .` then briefly come back to terminal to run
-- `gulp runtests-parallel`
+- `npm test`
 
 OK, that should have a copy of the compiler up and running and then you have tests going in the background to
 prove that everything is working fine. This could take maybe 10m? There'll be a progress indicator.
@@ -14,8 +14,8 @@ prove that everything is working fine. This could take maybe 10m? There'll be a 
 
 To get your VS Code env working smoothly, set up the per-user config
 
-- Set up your `.vscode/launch.json` by running: `cp ./vscode/launch.template.json ./vscode/launch.json`
-- Set up your `.vscode/settings.json` by running: `cp ./vscode/settings.template.json ./vscode/settings.json`
+- Set up your `.vscode/launch.json` by running: `cp .vscode/launch.template.json .vscode/launch.json`
+- Set up your `.vscode/settings.json` by running: `cp .vscode/settings.template.json .vscode/settings.json`
 
 In the `launch.json` I duplicate the configuration, and change `"${fileBasenameNoExtension}",` to be whatever test
 file I am currently working on.
