@@ -5,7 +5,7 @@
 - `Scanner` - Used by the parser to convert a string an chops into tokens in a linear fashion, then it's up to a
   parser to tree-ify them. Also: [see Scanner](https://basarat.gitbooks.io/typescript/docs/compiler/scanner.html)
 - `Binder` - Creates a symbol map and uses the AST to provide the type system
-  [See Binder](https://basarat.gitbooks.io/typescript/docs/compiler/binder.htmlhttps://basarat.gitbooks.io/typescript/docs/compiler/binder.html)
+  [See Binder](https://basarat.gitbooks.io/typescript/docs/compiler/binder.html)
 - `Checker` - Takes the AST, symbols and does the type checking and inference -
   [See Checker](https://basarat.gitbooks.io/typescript/docs/compiler/checker.html)
 - `Token` - A set of characters with some kind of semantic meaning, a parser generates a set of tokens
