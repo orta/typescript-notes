@@ -6,9 +6,9 @@ TypeScript compiler works and how you can contribute to it.
 Here are the high level sections in this docs:
 
 - [Getting Set up](#getting-set-up)
-- What is in the TypeScript repo?
-- How does the compiler work?
-- How does tsserver work?
+- [What is in the TypeScript repo?](#what-is-in-the-typescript-repo)
+- [The TypeScript Compiler](#the-typescript-compiler)
+- [How does tsserver work?](#how-does-tsserver-work)
 
 ## Getting Set Up
 
@@ -53,7 +53,7 @@ function.
 
 ```diff
 function checkSourceFileWorker(node: SourceFile) {
-+    debugger
++   debugger
     const links = getNodeLinks(node);
 ```
 
@@ -98,5 +98,49 @@ Abstractly, you can think of the compiler as going through this linear process (
 complicated, but as an overview it's fine) to achieve its goal:
 
 ![./imgs/compiler-linear.png](./imgs/compiler-linear.png)
+
+Let's go through these systems at a high level, indicating what sort of bugs or features might touch them.
+
+#### Parsing Text
+
+The Parser is an object which controls a Scanner. The Scanner iterates (mostly) forwards through the source code's
+text, having an understanding of when a particular set of syntax is finished.
+
+For example:
+
+```ts
+function hello() {
+  console.log("Hi");
+}
+```
+
+Produces a scanner result of:
+`FunctionKeyword, WhitespaceTrivia, Identifier, OpenParenToken, CloseParenToken, WhitespaceTrivia, OpenBraceToken, NewLineTrivia, WhitespaceTrivia, Identifier, DotToken, Identifier, OpenParenToken, StringLiteral, CloseParenToken, SemicolonToken, NewLineTrivia, CloseBraceToken, EndOfFileToken`.
+You can use [this playground plugin](https://www.typescriptlang.org/play?install-plugin=playground-ts-scanner) to
+see the tokens from a scanner for any TS/JS code.
+
+The parser will take that set of syntax tokens and form a syntax tree which is a series of nested nodes starting
+at a `SourceFile`:
+
+```
+SourceFile:
+  - statements: [
+    Function Declaration
+      - name: Identifier
+      - body: Block
+        statements: [
+          ExpressionStatement
+            expression: CallExpress
+              ...
+        ]
+  ]
+```
+
+This is the TypeScript syntax tree, and it is one of the core data models in the compiler as it represents the the
+structure of the code in memory.
+
+#### Type Checking
+
+#### Emit
 
 ### TSServer
