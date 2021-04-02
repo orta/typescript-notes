@@ -85,7 +85,7 @@ module:
 You can consider there to be three main entry points into TypeScript: Directly via `import "typescript"`, the CLI
 and tsserver.
 
-![./imgs/layers.png]
+![./imgs/layers.png](./imgs/layers.png)
 
 We'll be concentrating on an overview of these two parts: The TypeScript compiler and tsserver
 
@@ -97,6 +97,6 @@ _optionally_ run a type checker over those files, and emit corresponding `*.js`/
 Abstractly, you can think of the compiler as going through this linear process (in reality it gets a little more
 complicated, but as an overview it's fine) to achieve its goal:
 
-![./imgs/layers.png]
+![./imgs/layers.png](./imgs/compiler-liner.png)
 
 ### TSServer
