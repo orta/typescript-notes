@@ -97,6 +97,6 @@ _optionally_ run a type checker over those files, and emit corresponding `*.js`/
 Abstractly, you can think of the compiler as going through this linear process (in reality it gets a little more
 complicated, but as an overview it's fine) to achieve its goal:
 
-![./imgs/layers.png](./imgs/compiler-liner.png)
+![./imgs/compiler-linear.png](./imgs/compiler-linear.png)
 
 ### TSServer
