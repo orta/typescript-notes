@@ -3,7 +3,7 @@
 There's a lot to learn, and this document is going to try and give you a very high level overview of how the
 TypeScript compiler works and how you can contribute to it.
 
-Here are the high level sections in this docs:
+Here are the key sections in this docs:
 
 - [Getting Set up](#getting-set-up)
 - [What is in the TypeScript repo?](#what-is-in-the-typescript-repo)
