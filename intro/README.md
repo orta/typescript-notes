@@ -58,7 +58,7 @@ module:
 You can consider there to be three main entry points into TypeScript: Directly via
 `import * as ts from "typescript"`, the CLI and tsserver.
 
-![./imgs/layers.png](./imgs/layers.png)
+![./imgs/layers-2.png](./imgs/layers-2.png)
 
 We'll be concentrating on an overview of these two parts: The TypeScript compiler and tsserver
 
