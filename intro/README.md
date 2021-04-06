@@ -22,9 +22,9 @@ You need a modern version [of Node.js](https://nodejs.org/en/) installed and the
 - `code .` then briefly come back to terminal to run:
 - `npm test`
 
-With that done, you should have a copy of the compiler up and running and test running in the background to prove
-that everything is working fine. This could take around 10m, you should see be a progress indicator in your
-terminal.
+With that done, you should have a copy of the compiler up and running with tests running in the background to
+prove that everything is working correctly. This could take around 10m, you should see be a progress indicator in
+your terminal.
 
 ### What happened during setup
 
