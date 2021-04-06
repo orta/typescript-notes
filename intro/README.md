@@ -142,8 +142,7 @@ structure of the code in memory. You can explore the TypeScript syntax tree in
 (by turning on the "AST" setting) or in
 [TypeScript AST Viewer](https://ts-ast-viewer.com/#code/GYVwdgxgLglg9mABACwKYBt1wBQEpEDeAUIohAgM5zqoB0WA5tgEQASMzuA3EQL5A).
 
-Problems which require changes to the parser are ones where the TypeScript behavior or syntax does not match
-JavaScript behavior.
+Common changes to the parser are ones where the TypeScript behavior or syntax does not match JavaScript behavior.
 
 #### Type Checking
 
@@ -163,8 +162,46 @@ checkSourceFileWorker (for SourceFile)
 Effectively each syntax node has its own type checking function, and that's usually a good place to start if you
 want to add or amend a diagnostic which TypeScript raises.
 
-TypeScript's type system is built by creating a table of symbols
+TypeScript's type system works by creating symbols when "something" is declared. That "something" could be a
+variable, type, interface, function or more. A symbol has a set of flags which determine how it behaves. Symbols
+are then compared to each other during assignment and are used throughout the type system for checking.
+
+For example, this code:
+
+```ts
+function hello() {
+  console.log("Hi");
+}
+
+hello;
+```
+
+creates one new symbol `hello` which has a declaration of the whole function and the following flag is set:
+`SymbolFlags.Function`. This same symbol is used whenever the name `hello` appears. You can use
+[this playground plugin](https://www.typescriptlang.org/play?install-plugin=playground-ts-symbols) to see the
+symbols generated for any TS/JS code.
+
+Common changes to the type checker are PRs which revise, fix or create new error diagnostics around code patterns.
 
 #### Emit
 
+When creating output `.js`, `.d.ts`, `.map` files from `.js` or `.ts` files the code in `emitter.ts` takes
+responsibility.
+
+The emitter first uses a series of transformers to take the input file's syntax tree and convert that into a new
+syntax tree which fits the constraints of the tsconfig. For example if your target was `es2015` then the
+transformers for Class Fields, ESNext, ES2020, ES2019, ES2018, ES2017, ES2016, ES2015, and Generators would run.
+You can use
+[this playground plugin](https://www.typescriptlang.org/play?install-plugin=playground-transformer-timeline) to
+see the individual transformations for any TS/JS code.
+
+After the transforms are finished, the emitter recurses through the new syntax tree printing out nodes the into a
+new text file.
+
+Common changes to the emitter are PRs which implement new TypeScript syntax, or new JavaScript features from TC39.
+
 ### TSServer
+
+The TSServer is responsible for providing information to text editors. The TSServer powers features like code
+completion, refactoring tools and jump to definition. The TSServer works similar to the language server protocol
+but isn't quite compatible today.
