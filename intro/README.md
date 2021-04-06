@@ -22,8 +22,9 @@ You need a modern version [of Node.js](https://nodejs.org/en/) installed and the
 - `code .` then briefly come back to terminal to run:
 - `npm test`
 
-OK, that should have a copy of the compiler up and running and then you have tests going in the background to
-prove that everything is working fine. This could take around 10m, you should see be a progress indicator.
+With that done, you should have a copy of the compiler up and running and test running in the background to prove
+that everything is working fine. This could take around 10m, you should see be a progress indicator in your
+terminal.
 
 ### What happened during setup
 
@@ -54,8 +55,8 @@ module:
   `typescript.js`
 - `tsserver.js` - The command line wrapper for `typescriptServices.js`
 
-You can consider there to be three main entry points into TypeScript: Directly via `import "typescript"`, the CLI
-and tsserver.
+You can consider there to be three main entry points into TypeScript: Directly via
+`import * as ts from "typescript"`, the CLI and tsserver.
 
 ![./imgs/layers.png](./imgs/layers.png)
 
