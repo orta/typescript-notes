@@ -32,8 +32,8 @@ be used to force the emit type.
 
 ## Post Processing via Transformers
 
-The process of changing your AST into the expected JS or TS happens thremitter ugh compiler transformers. There is
-a full step
+The process of changing your AST into the expected JS or TS happens the emitter compiler transformers. There is a
+full step
 
 Emitting a declaration file is a multi-step process. It goes through the above emitter of its AST, but then _also_
 goes through a
