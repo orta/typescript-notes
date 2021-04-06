@@ -8,7 +8,8 @@ Here are the high level sections in this docs:
 - [Getting Set up](#getting-set-up)
 - [What is in the TypeScript repo?](#what-is-in-the-typescript-repo)
 - [The TypeScript Compiler](#the-typescript-compiler)
-- [How does tsserver work?](#how-does-tsserver-work)
+- [The TSServer](#the-tsserver)
+- [Tips and Tricks](#tips-and-tricks)
 
 ## Getting Set Up
 
@@ -37,39 +38,10 @@ improvements don't break old requirements.
 
 ### Configuring your editor
 
-To get your VS Code env working smoothly, set up the per-user config:
+To get your VS Code environment working smoothly, set up the per-user config:
 
 - Set up your `.vscode/launch.json` by running: `cp .vscode/launch.template.json .vscode/launch.json`
 - Set up your `.vscode/settings.json` by running: `cp .vscode/settings.template.json .vscode/settings.json`
-
-In the `launch.json` I duplicate the configuration, and change `"${fileBasenameNoExtension}",` to be whatever test
-file I am currently working on.
-
-### Learn the debugger
-
-To test it out the debugger, open up `src/compiler/checker.ts` find
-`function checkSourceFileWorker(node: SourceFile) {` and add a `debugger` statement on the first line in the
-function.
-
-```diff
-function checkSourceFileWorker(node: SourceFile) {
-+   debugger
-    const links = getNodeLinks(node);
-```
-
-If you open up `tests/cases/fourslash/getDeclarationDiagnostics.ts` and then run your new debugging launch task
-`Mocha Tests (currently opened test)`. VS Code will switch into the debugging mode and hit the debugger statement
-in your TypeScript.
-
-You'll probably want to add the following to your watch section in VS Code:
-
-- `node.__debugKind`
-- `node.__debugGetText()`
-- `source.symbol.declarations[0].__debugKind`
-- `target.symbol.declarations[0].__debugKind`
-
-This is really useful for keeping track of changing state, and it's pretty often that those are the names of
-things you're looking for.
 
 ## What is in the TypeScript repo?
 
@@ -200,8 +172,38 @@ new text file.
 
 Common changes to the emitter are PRs which implement new TypeScript syntax, or new JavaScript features from TC39.
 
-### TSServer
+## TSServer
 
 The TSServer is responsible for providing information to text editors. The TSServer powers features like code
 completion, refactoring tools and jump to definition. The TSServer works similar to the language server protocol
 but isn't quite compatible today.
+
+## Tips and Tricks
+
+### Embrace the debugger
+
+To test it out the debugger, open up `src/compiler/checker.ts` find
+`function checkSourceFileWorker(node: SourceFile) {` and add a `debugger` statement on the first line in the
+function.
+
+```diff
+function checkSourceFileWorker(node: SourceFile) {
++   debugger
+    const links = getNodeLinks(node);
+```
+
+Breakpoints will work too.
+
+If you open up `tests/cases/fourslash/getDeclarationDiagnostics.ts` and then run your new debugging launch task
+`Mocha Tests (currently opened test)`. VS Code will switch into the debugging mode and hit the debugger statement
+in your TypeScript.
+
+You'll probably want to add the following to your watch section in VS Code:
+
+- `node.__debugKind`
+- `node.__debugGetText()`
+- `source.symbol.declarations[0].__debugKind`
+- `target.symbol.declarations[0].__debugKind`
+
+This is really useful for keeping track of changing state, and it's pretty often that those are the names of
+things you're looking for.
