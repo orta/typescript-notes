@@ -77,7 +77,7 @@ Let's go through these systems at a high level, indicating what sort of bugs or 
 #### Parsing Text
 
 The Parser is an object which controls a Scanner. The Scanner iterates (mostly) forwards through the source code's
-text, having an understanding of when a particular set of syntax is finished.
+text, dividing it into a sequence of words and punctuation.
 
 For example:
 
@@ -109,19 +109,20 @@ SourceFile:
   ]
 ```
 
-This is the TypeScript syntax tree, and it is one of the core data models in the compiler as it represents the the
+This is the TypeScript syntax tree, and it is one of the core data models in the compiler as it represents the
 structure of the code in memory. You can explore the TypeScript syntax tree in
 [the Playground](https://www.typescriptlang.org/play/#code/GYVwdgxgLglg9mABACwKYBt1wBQEpEDeAUIohAgM5zqoB0WA5tgEQASMzuA3EQL5A)
 (by turning on the "AST" setting) or in
 [TypeScript AST Viewer](https://ts-ast-viewer.com/#code/GYVwdgxgLglg9mABACwKYBt1wBQEpEDeAUIohAgM5zqoB0WA5tgEQASMzuA3EQL5A).
 
-Common changes to the parser are ones where the TypeScript behavior or syntax does not match JavaScript behavior.
+Common changes to the parser are ones that add TypeScript syntax that does not exist in JavaScript, or adds new JavaScript syntax
+that was approved by the TC39 committee.
 
 #### Type Checking
 
 TypeScript's type system works by creating symbols when "something" is declared in a scope. That "something" could
-be a variable, type, interface, function or more. A symbol has a set of flags which determine how it should
-behave. Symbols are then compared to each other during assignment and are used throughout the type system for
+be a variable, type, interface, function or more. A symbol has a set of flags that indicate what kind(s) of 
+declaration(s) it's for. Symbols are then compared to each other during assignment and are used throughout the type system for
 checking.
 
 For example, this code:
@@ -134,15 +135,15 @@ function hello() {
 hello;
 ```
 
-creates one new symbol `hello` which has a declaration of the whole function and the following flag is set:
-`SymbolFlags.Function`. This same symbol is used whenever the name `hello` appears. You can use
-[this playground plugin](https://www.typescriptlang.org/play?install-plugin=playground-ts-symbols) to see the
+creates one new symbol `hello` whose declaration is the function `hello`. The following flag is set:
+`SymbolFlags.Function`. The compiler looks up this symbol whenever the name `hello` appears, like on the last line of the code. 
+You can use [this playground plugin](https://www.typescriptlang.org/play?install-plugin=playground-ts-symbols) to see the
 symbols generated for any TS/JS code.
 
 Creating symbols is the responsibility of the binder, which is the first part of the type checking process.
 
 Type checking in TypeScript happens in the file `checker.ts`, this is a 40k line function which does a huge amount
-of work. The checker works primarily by recursively diving into the syntax tree, and making assertions about the
+of work. The checker works primarily by recursively diving into, known as "walking", the syntax tree, and making assertions about the
 nodes on its way through.
 
 As a rough outline, using the code above, the following functions in the checker would be called:
@@ -150,7 +151,7 @@ As a rough outline, using the code above, the following functions in the checker
 ```
 checkSourceFileWorker (for the root SourceFile)
  - checkSourceElementWorker (for each Statement)
-  -  checkFunctionDeclaration then checkFunctionOrMethodDeclaration (for the Function Declaration)
+  -  checkFunctionDeclaration (for the Function Declaration)
     - checkBlock (for the function's body Block)
       ...
 ```
@@ -162,8 +163,7 @@ Common changes to the type checker are PRs which revise, fix or create new error
 
 #### Emit
 
-When creating output `.js`, `.d.ts`, `.map` files from `.js` or `.ts` files the code in `emitter.ts` takes
-responsibility.
+The code in `emitter.ts` creates output `.js`, `.d.ts`, `.map` files from `.js` or `.ts` files.
 
 The emitter first uses a series of transformers to take the input file's syntax tree and convert that into a new
 syntax tree which fits the constraints of the tsconfig. For example if your target was `es2015` then the
@@ -172,16 +172,17 @@ You can use
 [this playground plugin](https://www.typescriptlang.org/play?install-plugin=playground-transformer-timeline) to
 see the individual transformations for any TS/JS code.
 
-After the transforms are finished, the emitter recurses through the new syntax tree printing out nodes the into a
+After the transforms are finished, the emitter recurses through the new syntax tree printing out nodes into a
 new text file.
 
-Common changes to the emitter are PRs which implement new TypeScript syntax, or new JavaScript features from TC39.
+Common changes to the emitter are PRs which transform new TypeScript syntax, or new JavaScript features from TC39,
+into JavaScript that works on older platforms.
 
 ## TSServer
 
 The TSServer is responsible for providing information to text editors. The TSServer powers features like code
-completion, refactoring tools and jump to definition. The TSServer works similar to the language server protocol
-but isn't quite compatible today.
+completion, refactoring tools and jump to definition. The TSServer is similar to the language server protocol
+but is older.
 
 ## Tips and Tricks
 
@@ -196,7 +197,7 @@ confirmed mean there is less need to have discussion ahead of time.
 
 ### Look for similar merged PRs
 
-If your goal is to fix or amend an existing system, then its quite likely that similar code has been created,
+If your goal is to fix or amend an existing system, then it's quite likely that similar code has been created,
 there have already been 10k merged PRs to TypeScript. Finding a similar PR can really help narrow down where your
 existing change lives and how it can be tested.
 
