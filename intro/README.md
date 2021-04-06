@@ -137,9 +137,33 @@ SourceFile:
 ```
 
 This is the TypeScript syntax tree, and it is one of the core data models in the compiler as it represents the the
-structure of the code in memory.
+structure of the code in memory. You can explore the TypeScript syntax tree in
+[the Playground](https://www.typescriptlang.org/play/#code/GYVwdgxgLglg9mABACwKYBt1wBQEpEDeAUIohAgM5zqoB0WA5tgEQASMzuA3EQL5A)
+(by turning on the "AST" setting) or in
+[TypeScript AST Viewer](https://ts-ast-viewer.com/#code/GYVwdgxgLglg9mABACwKYBt1wBQEpEDeAUIohAgM5zqoB0WA5tgEQASMzuA3EQL5A).
+
+Problems which require changes to the parser are ones where the TypeScript behavior or syntax does not match
+JavaScript behavior.
 
 #### Type Checking
+
+Type checking in TypeScript happens in the file `checker.ts`, this is a 40k line function which does a lot of
+work. The checker works primarily by recursively diving into the syntax tree, and making assertions about the
+nodes on its way through.
+
+As a rough outline, using the code above, the following functions in the checker would be called:
+
+```
+checkSourceFileWorker (for SourceFile)
+ - checkSourceElementWorker (for each Statement)
+  -  checkFunctionDeclaration then checkFunctionOrMethodDeclaration (for the Function Declaration)
+    - checkBlock (for the function's body Block)
+```
+
+Effectively each syntax node has its own type checking function, and that's usually a good place to start if you
+want to add or amend a diagnostic which TypeScript raises.
+
+TypeScript's type system is built by creating a table of symbols
 
 #### Emit
 

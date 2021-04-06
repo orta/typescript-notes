@@ -1,6 +1,6 @@
 # Checker
 
-Ok, yeah, so it's a 30k LOC file. Why 30k lines in one file? Well there's a few main arguments:
+Ok, yeah, so it's a 40k LOC file. Why 40k lines in one file? Well there's a few main arguments:
 
 - All of the checker is in one place.
 - Save memory by making it a global, to quote a comment in the parser:
@@ -10,12 +10,12 @@ Ok, yeah, so it's a 30k LOC file. Why 30k lines in one file? Well there's a few 
   >   // can actually be expensive enough to impact us on projects with many source files.
   > ```
 
-* Lots of these functions need to know a lot about each other, the top of the function `createTypeChecker` has a
-  set of variables which are global within all of these functions and are liberally accessed.
+Lots of these functions need to know a lot about each other, the top of the function `createTypeChecker` has a set
+of variables which are global within all of these functions and are liberally accessed.
 
-  Switching to different files means probably making [god objects][god], and the checker needs to be extremely
-  fast. We want to avoid additional calls for ambient context. There are architectural patterns for this, but it's
-  better to assume good faith that they've been explored already (8 years down the line now.)
+Switching to different files means probably making [god objects][god], and the checker needs to be extremely fast.
+We want to avoid additional calls for ambient context. There are architectural patterns for this, but it's better
+to assume good faith that they've been explored already (8 years down the line now.)
 
 Anyway, better to get started somewhere. I [asked online](https://twitter.com/orta/status/1148335807780007939)
 about how people would try to study a file like this and I think one of the best paths is by following a
@@ -23,7 +23,7 @@ particular story as a file gets checked.
 
 ## An entry-point
 
-The likely entry point is via a Program. The program has a memoized typechecker created in
+The likely entry point for type checking is via a Program. The program has a memoized typechecker created in
 [`getDiagnosticsProducingTypeChecker`][0] which creates a type checker.
 
 The initial start of type checking starts with [`getDiagnosticsWorker`][1], worker in this case isn't a threading
@@ -31,7 +31,7 @@ term I believe ( at least I can't find anything like that in the code ) - it is 
 results (e.g. warns/fails) and then triggers [`checkSourceFileWorker`][2].
 
 This function starts at the root `Node` of any TS/JS file node tree: `SourceFile`. It will then have to recurse
-through all of the [AST][ast] nodes in it's tree.
+through all of the [Syntax Tree][ast] nodes in it's tree.
 
 It doesn't start with a single recursive function though, it starts by looking through the SourceFile's
 [`statements`][4] and through each one of those to get all the nodes. For example:
@@ -51,7 +51,7 @@ SourceFile
  statements:
 
   - VariableStatement
-    - declarationList: VariableDeclarationList # (because any const cna have many declarations in a row... )
+    - declarationList: VariableDeclarationList # (because any const can have many declarations in a row... )
       - variables: VariableStatement
         - etc
 
@@ -70,7 +70,7 @@ Each node has a different variable to work with (so you can't just say
 
 ## Checking a Statement
 
-Initially the meat of the work starts in [`checkSourceElementWorker`][6] which has a by `switch` statement that
+Initially the meat of the work starts in [`checkSourceElementWorker`][6] which has a `switch` statement that
 contains all legitimate nodes which can start a statement. Each node in the tree then does it's checking.
 
 Let's try get a really early error, with this bad code:
@@ -168,8 +168,9 @@ TODO: what are substituted types?
 
 ## Debugging Advice
 
-- If you want to find a diagnostic in the codebase, search for `diag(WXZY` e.g ``, you'll find
-  `src/compiler/diagnosticInformationMap.generated.ts` has it being referenced by a key. Search for that key.
+- If you want to find a diagnostic in the codebase, search for `diag(WXZY` e.g
+  ``, you'll find `src/compiler/diagnosticInformationMap.generated.ts` has it being referenced by a key. Search
+  for that key.
 
 - If you're working from an error and want to see the path it took to get there, you can add a breakpoint in
   [`createFileDiagnostic`][10] which should get called for all diagnostic errors.
