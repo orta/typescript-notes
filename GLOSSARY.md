@@ -42,7 +42,7 @@
 
 * `Literal` - A literal type is a type that only has a single value, e.g. `true`, `1`, `"abc"`, `undefined`.
 
-  For immutable objects, TypeScript creates a literal type which is is the value. For mutable objects TypeScript
+  For immutable objects, TypeScript creates a literal type which is the value. For mutable objects TypeScript
   uses the general type that the literal matches. See [#10676](https://github.com/Microsoft/TypeScript/pull/10676)
   for a longer explanation.
 
