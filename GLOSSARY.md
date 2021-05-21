@@ -20,7 +20,7 @@
 
 ### Type stuff which can be see outside the compilers
 
-- `Expando` - This is [the term](https://developer.mozilla.org/en-US/docs/Glossary/Expando( used to describe taking a JS object and adding new things to it which expands the type's shape
+- `Expando` - This is [the term](https://developer.mozilla.org/en-US/docs/Glossary/Expando) used to describe taking a JS object and adding new things to it which expands the type's shape
 
   ```js
   function doSomething() {}
