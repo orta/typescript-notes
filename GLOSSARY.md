@@ -20,6 +20,16 @@
 
 ### Type stuff which can be see outside the compilers
 
+- `Expando` - This is [the term](https://developer.mozilla.org/en-US/docs/Glossary/Expando( used to describe taking a JS object and adding new things to it which expands the type's shape
+
+  ```js
+  function doSomething() {}
+  doSomething.doSomethingElse = () => {}
+  ```
+  
+  In TS, this isn't really allowed without specifying `doSomethingElse` can exist on the object `doSomething` which is callable. In JS, this is a normal pattern in old school code. When in JS mode TypeScript will augment the types for `doSomething` to add `doSomethingElse` in the type system.
+
+
 - `Structural Type System` - A school of types system where the way types are compared is via the structure of
   their properties.
 
