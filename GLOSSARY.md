@@ -27,7 +27,7 @@
   doSomething.doSomethingElse = () => {}
   ```
   
-  In TS, this isn't really allowed without specifying `doSomethingElse` can exist on the object `doSomething` which is callable. In JS, this is a normal pattern in old school code. When in JS mode TypeScript will augment the types for `doSomething` to add `doSomethingElse` in the type system.
+  In TS, this is only allowed for adding properties to functions. In JS, this is a normal pattern in old school code for all kinds of objects. TypeScript will augment the types for `doSomething` to add `doSomethingElse` in the type system in both.
 
 
 - `Structural Type System` - A school of types system where the way types are compared is via the structure of
