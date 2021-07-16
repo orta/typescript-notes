@@ -15,8 +15,8 @@
 - `Location` / `Range`
 - `Freshness` - When a literal type is first created and not expanded by hitting a mutable location, see [Widening
   and Narrowing in TypeScript][wnn].
-- `Symbol` - The binder creates
-- `Transient Symbol` -
+- `Symbol` - An object that tracks all the places a variable or type is declared
+- `Transient Symbol` - A symbol created in the checker
 
 ### Type stuff which can be see outside the compilers
 
@@ -71,6 +71,8 @@
   let v4 = c4; // Type boolean
   let v5 = c5; // Type number | string
   ```
+
+  Literal types are sometimes called unit types, because they have only one ("unit") value.
 
 - `Control Flow Analysis` - using the natural branching and execution path of code to change the types at
   different locations in your source code by static analysis.
@@ -161,10 +163,42 @@ let onboardingMessage = helloWorld; // Type: string
 When the `helloWorld` constant was re-used in a mutable variable `onboardingMessage` the type which was set is an
 expanded version of `"Hello World"` which went from one value ever, to any known string.
 
-- `Transient` - unsure
+- `Transient` - a symbol created in the checker.
 
+  The checker creates its own symbols for unusual declarations:
+
+  1. Cross-file declarations
+
+  ```ts
+  // @filename: one.ts
+  interface I { a }
+  // @filename: two.ts
+  interface I { b }
+  ```
+
+  The binder creates two symbols for I, one in each file. Then the checker creates a merged symbol that has both declarations.
+
+  2. Synthetic properties
+
+  ```ts
+  type Nats = Record<'one' | 'two', number>
+  ```
+
+  The binder doesn't create any symbols for `one` or `two`, because those properties don't exist until the Record mapped type creates them.
+
+  3. Complex JS patterns
+
+  ```js
+  var f = function g() {
+    g.expando1 = {}
+
+  }
+  f.expando2 = {}
+  ```
+
+  People can put expando properties on a function expression inside or outside the function, using different names.
 - `Partial Type` -
-- `Synthetic` -
+- `Synthetic` - a property that doesn't have a declaration in source.
 - `Union Types`
 - `Enum`
 - `Discriminant`
