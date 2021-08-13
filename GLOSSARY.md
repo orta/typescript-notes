@@ -16,7 +16,7 @@
 - `Freshness` - When a literal type is first created and not expanded by hitting a mutable location, see [Widening
   and Narrowing in TypeScript][wnn].
 - `Symbol` - An object that tracks all the places a variable or type is declared
-- `Transient Symbol` - A symbol created in the checker
+- `Transient Symbol` - A symbol created in the checker, as opposed to in the binder
 
 ### Type stuff which can be see outside the compilers
 
