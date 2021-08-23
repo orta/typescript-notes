@@ -33,4 +33,6 @@ function f() { }
 
 When the binder visits `function f`, it creates a symbol with `SymbolFlags.Function` and an excludes mask of `SymbolFlags.FunctionExcludes`.
 `FunctionExcludes = Value & ~(Class | ValueModule | Function)`, which means that functions may not merge with values, except that they may merge with classes, namespaces and other functions.
+Because `var f` is already bound in the file, and because `Variable` is part of the `Value` mask, the binder will log a duplicate identifier error on both declarations of `f`.
+
 (Namespaces still often use the name 'module' internally, and namespaces containing values are distinct from namespaces that only contain types, which are not values.)
