@@ -1,18 +1,18 @@
 # Type Inference
 
-Typescript has a number of related techniques which together are
+TypeScript has a number of related techniques which together are
 called type inference: places where a type is discovered from
 inspecting values instead of a type annotation. This document
 covers them all in one place even though they're all fairly different.
 
-One thing that that is true of all type inference in Typescript:
+One thing that that is true of all type inference in TypeScript:
 type inference is a separate step that happens before checking. The
 checker will infer a type for a location; then it will check the type
 in the normal way, as if the type had been explicitly written. This
 results in redundant checking when the type inference is simple.
 
 None of these techniques are Hindley-Milner type inference. Instead,
-Typescript adds a few ad-hoc inference techniques to its normal
+TypeScript adds a few ad-hoc inference techniques to its normal
 type-checking. The result is a system that can infer from many useful
 locations, but nowhere near all of them.
 
