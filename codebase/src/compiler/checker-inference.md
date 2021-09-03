@@ -180,7 +180,7 @@ is elsewhere in the compiler.
    (`() => T/() => string`), so inference goes to `inferFromSignature`, which
    recursively infers from the return type.
 4. Now the source/target pair is `T/string`. Since the source is a
-   lone type parameters, we add `string` to the list of candidates for
+   lone type parameter, we add `string` to the list of candidates for
    `T`.
 
 Once all the parameters have had `inferTypes` called on them,
