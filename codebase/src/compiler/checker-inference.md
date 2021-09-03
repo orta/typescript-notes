@@ -56,7 +56,7 @@ The parameters `a` and `b` are contextually typed by the type
 of `a` and `b` until it finds a type annotation on a variable declaration.
 
 In fact, contextual typing only applies to two kinds of things:
-parameters and literals. But it may find a type in a variety of places.
+parameters and literals (including JSX literals). But it may find a type in a variety of places.
 Here are 3 typical ones:
 
 1. A type annotation on a declaration:
@@ -193,7 +193,8 @@ so `getUnionType` immediately returns `string`.
 #### Method of Combining Candidate Arrays
 
 Only inference to return types, `keyof T` and mapped type constraints
-(which are usually `keyof` too) produce a union. All other locations
+(which are usually `keyof` too) produce a union. These are all
+contravariant inference locations. All other locations
 call the custom code `getCommonSupertype`, which more or less does
 what it says. Note that object types are always unioned together
 first, regardless of inference position.
@@ -216,6 +217,12 @@ with the higher-priority candidate. For example, a lone type variable
 has the highest priority, but a type variable found inside a return type
 has one of the lowest priorities.
 
+Priorities have two important limitations:
+first, they are defined ad-hoc, based on heuristics developed by
+observing bad type inferences and trying to fix them. Second, throwing away
+low-priority inferences is faster, but will miss some inferences
+compared to integrating all priorities in some way.
+
 #### Contravariant Candidates
 
 Certain candidates are inferred contravariantly, such as parameters of
@@ -236,6 +243,10 @@ type Boxed<T> = { [K in keyof T]: Box<T[K]> }
 declare function unbox<T>(boxed: Boxed<T>): T;
 unbox({ a: { ref: 1 }, m: { ref: "1" } }) // returns { a: number, m: string }
 ```
+
+Reverse mapped types are normal types just like conditional types,
+index types, mapped types, etc. The difference is that they have no
+explicit syntax to construct them.
 
   <!-- prettier-ignore-start -->
 
