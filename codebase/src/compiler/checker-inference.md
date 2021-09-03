@@ -47,7 +47,7 @@ Contextual typing looks upward in the tree for a type based on a type
 annotation. This is unlike initialiser inference, which looks at a *sibling*
 node for a type based on a *value*. For example, in
 
-``` ts
+```ts
 const f: Callback = (a,b) => a.length + b
 ```
 
@@ -61,7 +61,7 @@ Here are 3 typical ones:
 
 1. A type annotation on a declaration:
 
-``` ts
+```ts
 type Config = { before(data: string): void }
 const cfg: Config = {
   before(x) {
@@ -72,14 +72,14 @@ const cfg: Config = {
 
 2. The left-hand side of an assignment:
 
-``` ts
+```ts
 let steps: ('up' | 'down' | 'left' | 'right')[] = ['up', 'up', 'down', 'down']
 steps = ['down']
 ```
 
 3. An argument in a function call:
 
-``` ts
+```ts
 declare function setup(register: (name: string, age: number) => void): void
 setup((name, age) => console.log(name, age))
 ```
@@ -135,7 +135,7 @@ but the inferred types don't replace a type annotation. Instead
 they're provided as type arguments to a function, which results in
 instantiating a generic function with some specific type. For example:
 
-``` ts
+```ts
 declare function setup<T>(config: { initial(): T }): T
 setup({ initial() { return "last" } })
 ```
@@ -145,7 +145,7 @@ string }`. By matching `T` in `{ initial(): T }` with `string` in `{
 initial(): string }`, it infers that `T` is `string`, making the
 second line the same as if the author had written:
 
-``` ts
+```ts
 setup<string>({ initial() { return "last" } })
 ```
 
@@ -230,7 +230,7 @@ not a central part of inference. A reverse mapped type is constructed when
 the target is a mapped type and the source is an object type. It
 allows a inference to apply to every member of an object type:
 
-``` ts
+```ts
 type Box<T> = { ref: T }
 type Boxed<T> = { [K in keyof T]: Box<T[K]> }
 declare function unbox<T>(boxed: Boxed<T>): T;
