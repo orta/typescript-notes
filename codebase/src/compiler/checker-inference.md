@@ -90,7 +90,7 @@ down through the *type* by reversing the path it walked up through the
 *tree*.
 
 Aside: In example (2), contextual typing gives `'down'` the
-*non-widening* type `'down'`; it would otherhave have the type
+*non-widening* type `'down'`; it would otherwise have the type
 `string`. That means `['down']` will have the type `'down'[]`, which
 is assignable to `steps`. So contextual typing lets programmers avoid
 writing `['down' as 'down']` in some cases.
