@@ -7,8 +7,6 @@ The map is associated with a container that creates a scope, like a function, a 
 It also contains a small summary of what kind of declaration it is -- mainly whether it is a value, a type, or a namespace.
 (Namespaces are the least common kind of declaration.)
 
-## Details
-
 For example,
 
 ```ts
@@ -38,19 +36,89 @@ Examples are `type`, `function`, `class`, `let`, `const` and parameters; *functi
 But as long as the declarations are of different kinds, they're fine.
 The binder tracks this using the same bitflag that tracks type and value status.
 
-TODO: This is unfinished.
+## Walkthrough
 
-## Special names
+```ts
+function f(m: number) {
+    type n = string
+    const n = m + 1
+    return m + n
+}
+```
 
-`export=`, `export default`, etc.
+The binder's basic tree walk starts in `bind`.
+There, it first encounters `f` and calls `bindFunctionDeclaration` and then `bindBlockScopeDeclaration` with `SymbolFlags.Function`.
+This function has special cases for files and modules, but the default case calls `declareSymbol` to add a symbol in the current container.
+There is a lot of special-case code in `declareSymbol`, but the important path is to check whether the symbol table already contains a symbol with the name of the declaration -- `f` in this case.
+If not, a new symbol is created.
+If so, the old symbol's exclude flags are checked against the new symbol's flags.
+If they conflict, the binder issues an error.
 
-## Intra-file merges
+Finally, the new symbol's `flags` are added to the old symbol's `flags` (if any), and the new declaration is added to the symbol's `declarations` array.
+In addition, if the new declaration is for a value, it is set as the symbol's `valueDeclaration`.
 
-Just save all the declarations and let the checker aggregate all the members later.
+#### Containers
+
+After `declareSymbol` is done, the `bind` visits the children of `f`; `f` is a container, so it calls `bindContainer` before `bindChildren`.
+The binder is recursive, so it pushes `f` as the new container by copying it to a local variable before walking its children.
+It pops `f` by copying the stored local back into `container`.
+
+The binder tracks the current lexical container as a pair of variables `container` and `blockScopedContainer` (and `thisParentContainer` if you OOP by mistake).
+It's implemented as a global variable managed by the binder walk, which pushes and pops containers as needed.
+The container's symbol table is initialised lazily, by `bindBlockScopedDeclaration`, for example.
+
+## Flags
+
+The rules for symbol merging are complicated, but they're implemented in a surprisingly small space using bitflags.
+The downside is that the bitflag system is very confusing.
+
+The basic rule is that a declaration's flags may not conflict with the existing excludes flags.
+And each kind of declaration maintains a list of declaration kinds that it may not merge with.
+
+In the example above, `type n` is a type alias, so the binder uses the flag `SymbolFlags.TypeAlias` and excludeFlags `SymbolFlags.TypeAliasExcludes`.
+The latter is an alias `SymbolFlags.Type`, which is a list of things not allowed to merge with type aliases:
+
+```ts
+Type = Class | Interface | Enum | EnumMember | TypeLiteral | TypeParameter | TypeAlias
+```
+
+Notice that these are all types, and includes `TypeAlias` itself.
+
+Next, when the binder reaches `const n`, it uses the flag `BlockScopedVariable` and excludeFlags `BlockScopedVariableExcludes`.
+`BlockScopedVariableExcludes = Value`, which is a list of every kind of value declaration.
+
+```ts
+Value = Variable | Property | EnumMember | ObjectLiteral | Function | Class | Enum | ValueModule | Method | GetAccessor | SetAccessor
+```
+
+`declareSymbol` looks up the existing excludeFlags for `n` and makes sure that `Value` doesn't conflict; `Value & Type === 0` so it doesn't.
+Then it *or*s the new and old flags and the new and old excludeFlags.
+In this example, that will prevent more value declarations because `Value & (Value | Type) !== 0`.
 
 ## Cross-file global merges
 
-They happen in the checker.
+Because the binder only binds one file at a time, the above system for merges only works with single files.
+For global (aka script) files, declarations can merge across files.
+This happens in the checker in `initializeTypeChecker`, using `mergeSymbolTable`.
+
+## Special names
+
+`getDeclarationName` translates certain nodes into internal names.
+`export=`, for example, gets translated to `InternalSymbolName.ExportEquals`
+
+TODO: Finish this
+
+## Control Flow
+
+TODO: Missing completely
+
+## Emit flags
+
+TODO: Missing completely
+
+## Exports
+
+TODO: Missing completely
 
 ## Javascript and CommonJS
 
