@@ -57,7 +57,7 @@ If they conflict, the binder issues an error.
 Finally, the new symbol's `flags` are added to the old symbol's `flags` (if any), and the new declaration is added to the symbol's `declarations` array.
 In addition, if the new declaration is for a value, it is set as the symbol's `valueDeclaration`.
 
-#### Containers
+## Containers
 
 After `declareSymbol` is done, the `bind` visits the children of `f`; `f` is a container, so it calls `bindContainer` before `bindChildren`.
 The binder is recursive, so it pushes `f` as the new container by copying it to a local variable before walking its children.
@@ -91,9 +91,23 @@ Next, when the binder reaches `const n`, it uses the flag `BlockScopedVariable` 
 Value = Variable | Property | EnumMember | ObjectLiteral | Function | Class | Enum | ValueModule | Method | GetAccessor | SetAccessor
 ```
 
-`declareSymbol` looks up the existing excludeFlags for `n` and makes sure that `Value` doesn't conflict; `Value & Type === 0` so it doesn't.
+`declareSymbol` looks up the existing excludeFlags for `n` and makes sure that `BlockScopedVariable` doesn't conflict; `BlockScopedVariable & Type === 0` so it doesn't.
 Then it *or*s the new and old flags and the new and old excludeFlags.
-In this example, that will prevent more value declarations because `Value & (Value | Type) !== 0`.
+In this example, that will prevent more value declarations because `BlockScopedVariable & (Value | Type) !== 0`.
+
+Here's some half-baked example code which shows off what you'd write if SymbolFlags used string enums and sets instead of bitflags.
+
+```ts
+const existing = symbolTable.get(name)
+const flags = SymbolFlags[declaration.kind] // eg "Function"
+if (existing.excludes.has(flags)) {
+  error("Cannot redeclare", name)
+}
+existing.flags.add(flags)
+for (const ex of ExcludeFlags[declaration.kind]) {
+  existing.excludeFlags.add(ex)
+}
+```
 
 ## Cross-file global merges
 
@@ -103,8 +117,11 @@ This happens in the checker in `initializeTypeChecker`, using `mergeSymbolTable`
 
 ## Special names
 
-`getDeclarationName` translates certain nodes into internal names.
+In `declareSymbol`, `getDeclarationName` translates certain nodes into internal names.
 `export=`, for example, gets translated to `InternalSymbolName.ExportEquals`
+
+Elsewhere in the binder, function expressions without names get `"__function"`
+Computed property names that aren't literals get `"__computed"`, manually.
 
 TODO: Finish this
 
@@ -131,9 +148,32 @@ Javascript has additional types of declarations that it recognises, which fall i
 
 Four! Four main categories!
 
-A lot of these declarations have close Typescript equivalents.
-However, they are function-scoped instead of block-scoped &mdash; they allow multiple declarations, which can conflict.
-And, since they're mostly assignments, there are a few more ways that they can be used.
+The first three categories really aren't much different from Typescript declarations.
+The main complication is that not all assignments are declarations, so there's quite a bit of code that decides which assignments should be treated as declarations.
+The checker is fairly resilient to non-declaration assignments being included, so it's OK if the code isn't perfect.
+
+In `bindWorker`'s `BinaryExpression` case, `getAssignmentDeclarationKind` is used to decide whether an assignment matches the syntactic requirements for declarations.
+Then each kind of assignment dispatches to a different binding function.
+
+### Global namespace creation code
+
+In addition to CommonJS, JS also supports creating global namespaces by assignments of object literals, functions and classes to global variables.
+This code is very complicated and is *probably* only ever used by Closure code bases, so it might be possible to remove it someday.
+
+``` js
+var Namespace = {}
+Namespace.Mod1 = {}
+Namespace.Mod2 = function () {
+  // callable module!
+}
+Namespace.Mod2.Sub1 = {
+  // actual contents
+}
+```
+
+TODO: This is unfinished.
+
+### JSDoc declarations
 
 TODO: This is unfinished.
 
@@ -147,7 +187,8 @@ module.exports = {
     bar: function() { return 'bar' },
     baz: 12,
 }
-if (windows) {
+if (isWindows) {
+    // override 'foo' with Windows-specific version
     module.exports.foo = function () { return 11 }
 }
 ```
@@ -157,7 +198,13 @@ Even though `foo` is declared twice, it should have one export with two declarat
 The type should be `() => number`, though that's the responsibility of the checker.
 
 In fact, this structure is too complicated to build in the binder, so the checker produces it through merges, using the same merge infrastructure it uses for cross-file global merges.
-However, the code is in a different place: `XXX`.
+The binder treats this pretty straightforwardly; it calls `bindModuleExportsAssignment` for `module.exports = {...`, which creates a single `export=` export.
+Then it calls `bindExportsPropertyAssignment` for `module.exports.foo = ...`, which creates a `foo` export.
 
-TODO: Describe looking up a JS export= and merging its contents back into the module.
-Then subsequent code has to ignore the JS export=.
+Having `export=` with other exports is impossible with ES module syntax, so the checker detects it and copies all the top-level exports into the `export=`.
+In the checker, `resolveExternalModuleSymbol` returns either an entire module's exports, or all the exports in an `export=`.
+In the combined CommonJS case we're discussing, `getCommonJsExportEquals` also checks whether a module has exports *and* `export=`.
+If it does, it copies each of the top-level exports into the `export=`.
+If a property with the same name already exists in the `export=`, the two are merged with `mergeSymbol`.
+
+Subsequent code in the checker that doesn't use `resolveExternalModuleSymbol` (is there any?) has to ignore the `export=`, since its contents are now just part of the module.
