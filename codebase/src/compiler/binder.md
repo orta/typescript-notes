@@ -1,13 +1,24 @@
 # Binder
 
 The binder walks the tree visiting each declaration in the tree.
-For each declaration that it finds, it adds a `Symbol` entry in a map called a `SymbolTable`.
-The map is associated with a container that creates a scope, like a function, a block, or a module file.
-`Symbol`s track the declaration, so that the checker can look up names and then check their types.
+For each declaration that it finds, it creates a `Symbol` that records its location and kind of declaration.
+Then it stores that symbol in a `SymbolTable` in the containing node, like a function, block or module file, that is the current scope.
+`Symbol`s let the checker look up names and then check their declarations to determine types.
 It also contains a small summary of what kind of declaration it is -- mainly whether it is a value, a type, or a namespace.
-(Namespaces are the least common kind of declaration.)
 
-For example,
+Since the binder is the first tree walk before checking, it also does some other tasks: setting up the control flow graph,
+as well as annotating parts of the tree that will need to be downlevelled for old ES targets.
+
+Here's an example:
+
+```ts
+// @Filename: main.ts
+var x = 1
+console.log(x)
+```
+
+The only declaration in this program is `var x`, which is contained in the SourceFile node for `main.ts`.
+Functions and classes introduce new scopes, so they are containers -- at the same time as being declarations themselves. So in:
 
 ```ts
 function f(n: number) {
@@ -16,7 +27,7 @@ function f(n: number) {
 }
 ```
 
-Creates a symbol table for `f` that contains two entries: `n` and `m`.
+The binder ends up with a symbol table for `f` that contains two entries: `n` and `m`.
 The binder finds `n` while walking the function's parameter list, and it finds `m` while walking the block that makes up `f`'s body.
 
 Both `n` and `m` are marked as values.
@@ -34,7 +45,6 @@ Now `n` has two declarations, one type and one value.
 The binder disallows more than one declaration of a kind of symbols with *block-scoped* declaration.
 Examples are `type`, `function`, `class`, `let`, `const` and parameters; *function-scoped* declarations include `var` and `interface`.
 But as long as the declarations are of different kinds, they're fine.
-The binder tracks this using the same bitflag that tracks type and value status.
 
 ## Walkthrough
 
@@ -69,20 +79,20 @@ The container's symbol table is initialised lazily, by `bindBlockScopedDeclarati
 
 ## Flags
 
-The rules for symbol merging are complicated, but they're implemented in a surprisingly small space using bitflags.
+The table for which symbols may merge with each other is complicated, but it's implemented in a surprisingly small space using the bitflag enum `SymbolFlags`.
 The downside is that the bitflag system is very confusing.
 
-The basic rule is that a declaration's flags may not conflict with the existing excludes flags.
-And each kind of declaration maintains a list of declaration kinds that it may not merge with.
+The basic rule is that a new declaration's *flags* may not conflict with the *excludes flags* of any previous declarations.
+Each kind of declaration has its own exclude flags; each one is a list of declaration kinds that cannot merge with that declaration.
 
-In the example above, `type n` is a type alias, so the binder uses the flag `SymbolFlags.TypeAlias` and excludeFlags `SymbolFlags.TypeAliasExcludes`.
-The latter is an alias `SymbolFlags.Type`, which is a list of things not allowed to merge with type aliases:
+In the example above, `type n` is a type alias, which has flags = `SymbolFlags.TypeAlias` and excludeFlags = `SymbolFlags.TypeAliasExcludes`.
+The latter is an alias of `SymbolFlags.Type`, meaning generally that type aliases can't merge with anything that declares a type:
 
 ```ts
 Type = Class | Interface | Enum | EnumMember | TypeLiteral | TypeParameter | TypeAlias
 ```
-
-Notice that these are all types, and includes `TypeAlias` itself.
+Notice that this list includes `TypeAlias` itself, and declarations like classes and enums that also declare values.
+`Value` includes `Class` and `Enum` as well.
 
 Next, when the binder reaches `const n`, it uses the flag `BlockScopedVariable` and excludeFlags `BlockScopedVariableExcludes`.
 `BlockScopedVariableExcludes = Value`, which is a list of every kind of value declaration.
