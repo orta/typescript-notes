@@ -2,7 +2,7 @@
 
 
 Completions for TypeScript and JavaScript are provided by TypeScript's language service.
-When you are in the middle of typing something in an editor (or if you hit `Ctrl` + `Space` in VSCode), the editor sends a request to the TypeScript language service.
+When you are in the middle of typing something in an editor (or if you hit <kbd>Ctrl</kbd> + <kbd>Space</kbd> in VSCode), the editor sends a request to the TypeScript language service.
 Completions is responsible for answering that request with suggestions to *complete* what you are typing.
 
 
