@@ -24,17 +24,17 @@ Some `CompletionEntry` properties and what they mean:
 * **insertText**: the text that is going to be inserted in the file, at the completion position, when the user accepts the suggestion corresponding to this completion entry.
 `insertText` is optional, and if it is not present, then `name` is the text that is inserted instead.
 * **isSnippet**: if this is true, then this completion entry is a snippet, and `insertText` is a snippet text.  
-e.g.:
-A completion snippet for declaring a method `foo`, with a tab stop (`${0}`) in its body:
-```ts
-{
-    isSnippet: true,
-    insertText: "foo() { ${0} }",
-}
-```
-becomes this in VSCode, when accepted (note the cursor position):
-![Screenshot of vscode with code `class Foo { foo() { | } }` in it.](../../screenshots/threeslash-refs.png)
-For more on snippets, see [Snippets in Visual Studio Code](https://code.visualstudio.com/docs/editor/userdefinedsnippets).
+  e.g.:
+  A completion snippet for declaring a method `foo`, with a tab stop (`${0}`) in its body:
+  ```ts
+  {
+      isSnippet: true,
+      insertText: "foo() { ${0} }",
+  }
+  ```
+  becomes this in VSCode, when accepted (note the cursor position):
+  ![Screenshot of vscode with code `class Foo { foo() { | } }` in it.](../../screenshots/threeslash-refs.png)
+  For more on snippets, see [Snippets in Visual Studio Code](https://code.visualstudio.com/docs/editor/userdefinedsnippets).
 * **replacementSpan**: the span (i.e. a continuous range) of the source file that is going to be *replaced* by the text inserted by this completion. It is optional, so we only need to provide this if we want to override the *default* replacement span for this completion entry. 
 * **hasAction**: whether that completion requires additional actions if it is accepted. For instance, a completion might insert variables that need to be imported, so if that completion is accepted, it needs an additional action of inserting import statements.
 
