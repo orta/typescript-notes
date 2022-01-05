@@ -33,7 +33,7 @@ A completion snippet for declaring a method `foo`, with a tab stop (`${0}`) in i
 }
 ```
 becomes this in VSCode, when accepted (note the cursor position):
-![Screenshot of vscode with code `class Foo { foo() { | } }` in it.](./screenshots/threeslash-refs.png)
+![Screenshot of vscode with code `class Foo { foo() { | } }` in it.](../../screenshots/threeslash-refs.png)
 For more on snippets, see [Snippets in Visual Studio Code](https://code.visualstudio.com/docs/editor/userdefinedsnippets).
 * **replacementSpan**: the span (i.e. a continuous range) of the source file that is going to be *replaced* by the text inserted by this completion. It is optional, so we only need to provide this if we want to override the *default* replacement span for this completion entry. 
 * **hasAction**: whether that completion requires additional actions if it is accepted. For instance, a completion might insert variables that need to be imported, so if that completion is accepted, it needs an additional action of inserting import statements.
@@ -91,7 +91,7 @@ Another scenario that works similarly is import completions: in `createCompletio
 E.g. are you inside a string and asking for completions? TS differentiates between reference comments
 ([triple slash](https://www.typescriptlang.org/docs/handbook/triple-slash-directives.html)):
 
-![./screenshots/threeslash-refs.png](./screenshots/threeslash-refs.png)
+![../../screenshots/threeslash-refs.png](../../screenshots/threeslash-refs.png)
 
 And strings as a part of the AST. These have a
 [few](https://github.com/Microsoft/TypeScript/blob/340f81035ff1d753e6a1f0fedc2323d169c86cc6/src/services/stringCompletions.ts#L103)
